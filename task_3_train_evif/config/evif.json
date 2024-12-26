@@ -101,7 +101,7 @@
         }
     },
     "trainer": {
-        "epochs": 100,
+        "epochs": 80,
         "save_dir": "./experiments/evif",
         "save_period": 10,
 	    "val_period": 100,
