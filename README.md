@@ -32,19 +32,17 @@ Update the paths in the dataset `.txt` files to match your local environment.
 
 To train tasks 1-3, navigate to the corresponding task's folder and run:
 
-```bash
-bash run_train.sh
+```bash run_train.sh```
 
 Make sure to check and modify the configuration files to set the correct paths for the dataset, save directories, and any pretrained models if needed.
-The pretrained model needed for task 1 (update_reconstruction_model.pth) can be downloaded from [event_cnn_minimal](https://github.com/TimoStoff/event_cnn_minimal)
+The pretrained model needed for task 1 (update_reconstruction_model.pth) can be downloaded from [event_cnn_minimal](https://github.com/TimoStoff/event_cnn_minimal).
 
 For inference, run:
 
-```bash
-bash run_inference.sh 
+```bash run_inference.sh```
 
 
-Some quick ablation study results (task 3 trained run_train.sh, get fused frames with run_inference.sh, then tested with [VIFB](https://github.com/xingchenzhang/VIFB)):
+Some quick ablation study results (task 3 trained with run_train.sh, get fused frames with run_inference.sh, then tested with [VIFB](https://github.com/xingchenzhang/VIFB)):
 
 | Metric               | Task 3 w/o MI optimization | Task 3 w/ only MI minimization | Task 3 w/ MI min-max |
 |----------------------|----------------------------|--------------------------------|-----------------------|
