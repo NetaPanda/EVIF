@@ -1,0 +1,112 @@
+{
+    "name": "reconstruction",
+    "n_gpu": 1,
+    "arch": {
+        "type": "FlowNet",
+        "args": {
+	    "unet_kwargs": {
+                "num_bins": 10,
+                "skip_type": "sum",
+                "recurrent_block_type": "convlstm",
+                "num_encoders": 3,
+                "base_num_channels": 32,
+                "num_residual_blocks": 2,
+                "use_upsample_conv": true,
+                "norm": "none",
+                "num_output_channels": 3
+	    }
+        }
+    },
+    "data_loader": {
+        "type": "HDF5DataLoader",
+        "args": {
+            "data_file": "/home/gmy/data/evt_rec_h5_dataset/train_list.txt",
+            "batch_size": 2,
+            "shuffle": true,
+            "num_workers": 0,
+            "pin_memory": true,
+            "sequence_kwargs": {
+                "sequence_length": 100,
+                "dataset_type": "DynamicH5Dataset",
+                "proba_pause_when_running": 0.05,
+                "proba_pause_when_paused": 0.9,
+                "normalize_image": false,
+                "noise_kwargs": {
+                    "noise_std":0.001,
+                    "noise_fraction": 1.0
+                },
+                "hot_pixel_kwargs": {
+                    "hot_pixel_std": 0.1,
+                    "max_hot_pixel_fraction": 0.001
+                },
+                "dataset_kwargs": {
+                    "transforms": {
+                        "RandomCrop": {
+                            "size": 112
+                        },
+                        "RandomFlip": {}
+                    },
+                    "num_bins": 5,
+                    "combined_voxel_channels": false
+                }
+            }
+        }
+    },
+    "valid_data_loader": {
+        "type": "HDF5DataLoader",
+        "args": {
+            "data_file": "/home/gmy/data/evt_rec_h5_dataset/validation_list.txt",
+            "batch_size": 1,
+            "shuffle": false,
+            "num_workers": 0,
+            "pin_memory": true,
+            "sequence_kwargs": {
+                "sequence_length": 320,
+                "dataset_type": "DynamicH5Dataset",
+                "normalize_image": true,
+                "dataset_kwargs": {
+                    "max_length": 320,
+                    "num_bins": 5,
+                    "combined_voxel_channels": false
+                }
+            }
+        }
+    },
+    "optimizer": {
+        "type": "Adam",
+        "args": {
+            "lr": 0.0001,
+            "weight_decay": 0,
+            "amsgrad": true
+        }
+    },
+    "loss_ftns": {
+        "perceptual_loss": {
+            "weight": 1.0,
+	    "net": "vgg"
+        },
+        "temporal_consistency_loss": {
+            "L0": 2,
+            "weight": 1.0
+        }
+    },
+    "lr_scheduler": {
+        "type": "StepLR",
+        "args": {
+            "step_size": 40,
+            "gamma": 1.0
+        }
+    },
+    "trainer": {
+        "epochs": 100,
+        "save_dir": "experiments/e2vid_KAIST",
+        "save_period": 5,
+        "verbosity": 2,
+        "monitor": "min loss",
+        "num_previews": 4,
+        "val_num_previews": 8,
+        "tensorboard": true
+    },
+    "resume_ckpt": "/home/gmy/event_cnn_minimal/pretrained/reconstruction/update_reconstruction_model.pth"
+
+}

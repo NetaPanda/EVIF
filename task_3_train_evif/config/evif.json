@@ -1,0 +1,115 @@
+{
+    "name": "evif",
+    "n_gpu": 1,
+    "arch": {
+        "type": "Full_fusion_model",
+        "args": {
+            "unet_kwargs": {
+                "num_bins": 10,
+                "skip_type": "concat",
+                "recurrent_block_type": "convlstm",
+                "num_encoders": 3,
+                "base_num_channels": 32,
+                "num_residual_blocks": 2,
+                "use_upsample_conv": true,
+                "norm": "none",
+                "num_output_channels": 3,
+                "kernel_size": 3,
+                "EFNet_args": { 
+                               "wf": 64,
+                               "fuse_before_downsample": true,
+                               "in_chn": 3,
+                               "ev_chn": 10
+                              }
+            }
+        }
+    },
+    "data_loader": {
+        "type": "HDF5DataLoader",
+        "args": {
+            "data_file": "/home/gmy/data/evt_rec_h5_dataset/train_list.txt",
+            "data_file_deblur": "/home/gmy/data/infrare_deblur_h5_dataset_with_vis_gt_blur_newnew_thin_copy/train_list.txt",
+            "batch_size": 6,
+            "shuffle": true,
+            "num_workers": 8,
+            "pin_memory": true,
+            "dataset_kwargs": {
+                "noise_kwargs": {
+                    "noise_std":0.001,
+                    "noise_fraction": 1.0
+                },
+                "hot_pixel_kwargs": {
+                    "hot_pixel_std": 0.1,
+                    "max_hot_pixel_fraction": 0.001
+                },
+                "transforms": {
+                    "RandomFlip": {}
+                },
+                "num_bins": 5,
+                "history_size": 20,
+                "dt": 0.05,
+                "skip_size": 15,
+                "combined_voxel_channels": false,
+		"crop_size": 256
+            }
+        }
+    },
+    "valid_data_loader": {
+        "type": "HDF5DataLoader",
+        "args": {
+            "data_file": "/home/gmy/data/evt_rec_h5_dataset/validation_list.txt",
+            "data_file_deblur": "/home/gmy/data/infrare_deblur_h5_dataset_with_vis_gt_blur_newnew_thin_copy/validation_list.txt",
+            "batch_size": 1,
+            "shuffle": false,
+            "num_workers": 0,
+            "pin_memory": true,
+            "dataset_kwargs": {
+                "transforms": {
+                },
+                "num_bins": 5,
+                "history_size": 20,
+                "dt": 0.05,
+                "skip_size": 15,
+                "combined_voxel_channels": false
+            }
+        }
+    },
+    "optimizer": {
+        "type": "AdamW",
+        "args": {
+            "lr": 0.0002,
+            "weight_decay": 0.0001,
+	    "betas": [0.9,0.99]
+        }
+    },
+    "loss_ftns": {
+        "seafusion_loss": {
+            "weight": 1.0
+        },
+        "min_mi_loss_vis_inf": {
+            "weight": 0.001
+        },
+        "max_mi_loss_vis_inf": {
+            "weight": 0.01
+        }
+    },
+    "lr_scheduler": {
+        "type": "CosineAnnealingLR",
+        "args": {
+            "T_max": 10000000,
+            "eta_min": 1e-7
+        }
+    },
+    "trainer": {
+        "epochs": 100,
+        "save_dir": "./experiments/evif",
+        "save_period": 10,
+	    "val_period": 100,
+        "verbosity": 2,
+        "monitor": "min loss",
+        "num_previews": 4,
+        "val_num_previews": 8,
+        "tensorboard": true
+    },
+    "resume_ckpt_full": "/home/gmy/task_2_train_evt_based_inf_deblur/experiments/checkpoint-epoch220.pth"
+}

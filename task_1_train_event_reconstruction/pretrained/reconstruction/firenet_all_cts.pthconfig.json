@@ -1,0 +1,103 @@
+{
+    "name": "firenet_seqLength120_all_cts_noise_tc0.2",
+    "n_gpu": 1,
+    "arch": {
+        "type": "FireNet",
+        "args": {
+            "num_bins": 5,
+            "base_num_channels": 16,
+            "kernel_size": 3
+        }
+    },
+    "data_loader": {
+        "type": "HDF5DataLoader",
+        "args": {
+            "data_file": "/home/timo/Data2/training_data/h5_voxels/5bins/data_file_all_cts_and_ct_range.txt",
+            "batch_size": 2,
+            "shuffle": true,
+            "num_workers": 0,
+            "pin_memory": true,
+            "sequence_kwargs": {
+                "sequence_length": 120,
+                "dataset_type": "HDF5Dataset",
+                "proba_pause_when_running": 0.05,
+                "proba_pause_when_paused": 0.9,
+                "normalize_image": false,
+                "noise_kwargs": {
+                    "noise_std": 0.1,
+                    "noise_fraction": 1.0
+                },
+                "hot_pixel_kwargs": {
+                    "hot_pixel_std": 0.1,
+                    "max_hot_pixel_fraction": 0.001
+                },
+                "dataset_kwargs": {
+                    "transforms": {
+                        "RandomCrop": {
+                            "size": 128
+                        },
+                        "RandomFlip": {}
+                    },
+                    "h5_path": "/home/timo/Data2/training_data/h5_voxels/5bins/ct_range_all_5bin/1.5/000000029_ct1.5.h5"
+                }
+            }
+        }
+    },
+    "valid_data_loader": {
+        "type": "HDF5DataLoader",
+        "args": {
+            "data_file": "/home/timo/Data2/preprocessed_datasets/h5/5bins/validation/cedric_subset.txt",
+            "batch_size": 1,
+            "shuffle": false,
+            "num_workers": 1,
+            "pin_memory": true,
+            "sequence_kwargs": {
+                "sequence_length": 160,
+                "dataset_type": "HDF5Dataset",
+                "normalize_image": true,
+                "dataset_kwargs": {
+                    "max_length": 320,
+                    "transforms": {
+                        "CenterCrop": {
+                            "size": 160
+                        }
+                    },
+                    "h5_path": "/home/timo/Data2/preprocessed_datasets/h5/5bins/validation/mvsec/outdoor_day1_data.h5"
+                }
+            }
+        }
+    },
+    "optimizer": {
+        "type": "Adam",
+        "args": {
+            "lr": 0.0001,
+            "weight_decay": 0,
+            "amsgrad": true
+        }
+    },
+    "loss_ftns": {
+        "perceptual_loss": {
+            "weight": 1.0
+        },
+        "temporal_consistency_loss": {
+            "weight": 0.2
+        }
+    },
+    "lr_scheduler": {
+        "type": "StepLR",
+        "args": {
+            "step_size": 50,
+            "gamma": 1.0
+        }
+    },
+    "trainer": {
+        "epochs": 500,
+        "save_dir": "/home/timo/Data2/results/training/firenet/firenet_all_cts",
+        "save_period": 2,
+        "verbosity": 2,
+        "monitor": "min val_loss",
+        "num_previews": 4,
+        "val_num_previews": 8,
+        "tensorboard": true
+    }
+}
